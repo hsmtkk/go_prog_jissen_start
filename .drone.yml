@@ -1,0 +1,33 @@
+kind: pipeline
+type: docker
+name: default
+
+steps:
+  - name: drone lint
+    image: sdesbure/yamllint
+    commands:
+      - yamllint -d relaxed .drone.yml
+  - name: go test
+    depends_on:
+      - drone lint
+    image: golang:1.14
+    commands:
+      - cd pkg/helloworld
+      - go test
+  - name: go build
+    image: golang:1.14
+    depends_on:
+      - go test
+    environment:
+      CGO_ENABLED: "0"
+    commands:
+      - cd cmd/helloworld
+      - go build -o helloworld
+  - name: run
+    image: curlimages/curl:7.70.0
+    depends_on:
+      - go build
+    commands:
+      - cd cmd/helloworld
+      - ./helloworld &
+      - curl http://127.0.0.1:8080
