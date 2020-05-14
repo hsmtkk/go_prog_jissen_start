@@ -1,0 +1,7 @@
+version: "3"
+services:
+  webapp:
+    image: hoge
+  database:
+    image: postgresql
+    
